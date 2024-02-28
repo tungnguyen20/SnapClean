@@ -19,6 +19,9 @@
 		A6F52A512B8CFF900008F8B4 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A502B8CFF900008F8B4 /* HomeViewModel.swift */; };
 		A6F52A532B8D02DF0008F8B4 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A522B8D02DF0008F8B4 /* Colors.swift */; };
 		A6F52A562B8D04190008F8B4 /* Color+.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A552B8D04190008F8B4 /* Color+.swift */; };
+		A6F52A592B8E01300008F8B4 /* PhotosLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A582B8E01300008F8B4 /* PhotosLoader.swift */; };
+		A6F52A5E2B8E019C0008F8B4 /* ThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A5D2B8E019C0008F8B4 /* ThumbnailView.swift */; };
+		A6F52A602B8E43BE0008F8B4 /* AssetListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A5F2B8E43BE0008F8B4 /* AssetListView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +38,9 @@
 		A6F52A502B8CFF900008F8B4 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		A6F52A522B8D02DF0008F8B4 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		A6F52A552B8D04190008F8B4 /* Color+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+.swift"; sourceTree = "<group>"; };
+		A6F52A582B8E01300008F8B4 /* PhotosLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosLoader.swift; sourceTree = "<group>"; };
+		A6F52A5D2B8E019C0008F8B4 /* ThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailView.swift; sourceTree = "<group>"; };
+		A6F52A5F2B8E43BE0008F8B4 /* AssetListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,8 +73,10 @@
 		A6F52A302B8CF9320008F8B4 /* SnapClean */ = {
 			isa = PBXGroup;
 			children = (
+				A6F52A572B8E011F0008F8B4 /* Manager */,
 				A6F52A542B8D04080008F8B4 /* Extensions */,
 				A6F52A472B8CFCE70008F8B4 /* Resources */,
+				A6F52A5A2B8E01780008F8B4 /* Views */,
 				A6F52A442B8CFAF70008F8B4 /* Modules */,
 				A6F52A312B8CF9320008F8B4 /* SnapCleanApp.swift */,
 				A6F52A332B8CF9320008F8B4 /* ContentView.swift */,
@@ -109,6 +117,7 @@
 		A6F52A462B8CFB060008F8B4 /* AssetList */ = {
 			isa = PBXGroup;
 			children = (
+				A6F52A5F2B8E43BE0008F8B4 /* AssetListView.swift */,
 			);
 			path = AssetList;
 			sourceTree = "<group>";
@@ -129,6 +138,22 @@
 				A6F52A552B8D04190008F8B4 /* Color+.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		A6F52A572B8E011F0008F8B4 /* Manager */ = {
+			isa = PBXGroup;
+			children = (
+				A6F52A582B8E01300008F8B4 /* PhotosLoader.swift */,
+			);
+			path = Manager;
+			sourceTree = "<group>";
+		};
+		A6F52A5A2B8E01780008F8B4 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A6F52A5D2B8E019C0008F8B4 /* ThumbnailView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -206,11 +231,14 @@
 				A6F52A532B8D02DF0008F8B4 /* Colors.swift in Sources */,
 				A6F52A342B8CF9320008F8B4 /* ContentView.swift in Sources */,
 				A6F52A4F2B8CFEDA0008F8B4 /* HomeSectionView.swift in Sources */,
+				A6F52A592B8E01300008F8B4 /* PhotosLoader.swift in Sources */,
 				A6F52A512B8CFF900008F8B4 /* HomeViewModel.swift in Sources */,
 				A6F52A322B8CF9320008F8B4 /* SnapCleanApp.swift in Sources */,
 				A6F52A492B8CFD030008F8B4 /* HomeView.swift in Sources */,
+				A6F52A5E2B8E019C0008F8B4 /* ThumbnailView.swift in Sources */,
 				A6F52A4B2B8CFDDD0008F8B4 /* Fonts.swift in Sources */,
 				A6F52A3E2B8CF9330008F8B4 /* SnapClean.xcdatamodeld in Sources */,
+				A6F52A602B8E43BE0008F8B4 /* AssetListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -344,9 +372,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"SnapClean/Preview Content\"";
-				DEVELOPMENT_TEAM = BHG47KS87C;
+				DEVELOPMENT_TEAM = 8BJQV3U22K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Allow $(PRODUCT_NAME) access to your photo library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -358,7 +387,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tungdayne.snapclean.SnapClean;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tungdayne.snapclean;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -374,9 +403,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"SnapClean/Preview Content\"";
-				DEVELOPMENT_TEAM = BHG47KS87C;
+				DEVELOPMENT_TEAM = 8BJQV3U22K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Allow $(PRODUCT_NAME) access to your photo library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -388,7 +418,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tungdayne.snapclean.SnapClean;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tungdayne.snapclean;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Photos
 
 class HomeViewModel: ObservableObject {
     
@@ -15,8 +16,19 @@ class HomeViewModel: ObservableObject {
         .init(type: .duplicates, totalItems: 15, totalSize: 1920)
     ]
     
+    var largeAssets = PHFetchResult<PHAsset>()
+    var screenshots = PHFetchResult<PHAsset>()
+    let minLargeFileSize = 10_000_000 // KB
+    
     init() {
- 
+        loadLargeFiles()
+    }
+    
+    func loadLargeFiles() {
+        let options = PHFetchOptions()
+//        options.predicate = NSPredicate(format: "pixelWidth > %d", minLargeFileSize)
+        largeAssets = PHAsset.fetchAssets(with: options)
+        print(largeAssets.count)
     }
     
 }
@@ -26,6 +38,7 @@ extension HomeViewModel {
     enum SectionType {
         case largeFiles
         case screenshots
+        case similars
         case duplicates
         
         var title: String {
@@ -34,6 +47,8 @@ extension HomeViewModel {
                 return "Large files"
             case .screenshots:
                 return "Screenshots"
+            case .similars:
+                return "Similars"
             case .duplicates:
                 return "Duplicates"
             }

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "B9A3285C-0979-4473-A177-309935B1C91C"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "739CC501-9C91-4408-BC37-66B7B8ED8D80"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SnapClean/Modules/Home/HomeViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "31"
+            endingLineNumber = "31"
+            landmarkName = "loadLargeFiles()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "739CC501-9C91-4408-BC37-66B7B8ED8D80 - 761e1e173ca6e452"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "SnapClean.HomeViewModel.loadLargeFiles() -&gt; ()"
+                  moduleName = "SnapClean"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tung/Data/tung/SnapClean/SnapClean/Modules/Home/HomeViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "31"
+                  endingLineNumber = "31"
+                  offsetFromSymbolStart = "392">
+               </Location>
+               <Location
+                  uuid = "739CC501-9C91-4408-BC37-66B7B8ED8D80 - 761e1e173ca6e452"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "SnapClean.HomeViewModel.loadLargeFiles() -&gt; ()"
+                  moduleName = "SnapClean"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tung/Data/tung/SnapClean/SnapClean/Modules/Home/HomeViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "31"
+                  endingLineNumber = "31"
+                  offsetFromSymbolStart = "192">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
