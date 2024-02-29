@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject var viewModel = HomeViewModel()
+    @EnvironmentObject var photoLoader: PhotosLoader
     
     var body: some View {
         VStack {
@@ -21,7 +22,10 @@ struct HomeView: View {
             
             ScrollView {
                 ForEach(viewModel.sections) { section in
-                    HomeSectionView(section: section)
+                    HomeSectionView(section: section) {
+                        
+                    }
+                    .environmentObject(photoLoader)
                 }
             }
         }
@@ -35,7 +39,10 @@ struct HomeView: View {
 }
 
 struct HomeSectionView: View {
+    @EnvironmentObject var photoLoader: PhotosLoader
     var section: HomeViewModel.Section
+    @State var showDetail: Bool = false
+    var onSelect: () -> ()
     
     var body: some View {
         VStack {
@@ -49,22 +56,30 @@ struct HomeSectionView: View {
                         .foregroundStyle(Color.textSecondary)
                 }
                 Spacer()
-                Button(action: {
-                    
-                }, label: {
-                    Text("Review")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(Color.brand)
-                        .padding(16)
-                        .background(Color.gray100)
-                        .clipShape(Capsule())
-                })
+                NavigationLink(isActive: $showDetail) {
+                    switch section.type {
+                    case .screenshots:
+                        ScreenshotAssetListView()
+                            .navigationBarHidden(true)
+                            .environmentObject(photoLoader)
+                    default:
+                        DefaultAssetListView()
+                            .navigationBarHidden(true)
+                            .environmentObject(photoLoader)
+                    }
+                } label: {
+                    Button(action: {
+                        showDetail = true
+                    }, label: {
+                        Text("Review")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(Color.brand)
+                            .padding(16)
+                            .background(Color.gray100)
+                            .clipShape(Capsule())
+                    })
+                }
             }
-            
-//            LazyVGrid(columns: /*@START_MENU_TOKEN@*/[GridItem(.fixed(20))]/*@END_MENU_TOKEN@*/, content: {
-//                /*@START_MENU_TOKEN@*/Text("Placeholder")/*@END_MENU_TOKEN@*/
-//                Text("Placeholder")
-//            })
         }
         .padding(16)
         .background(Color.white)

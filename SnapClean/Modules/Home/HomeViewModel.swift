@@ -55,7 +55,7 @@ extension HomeViewModel {
         }
     }
     
-    struct Section: Identifiable {
+    struct Section: Identifiable, Hashable {
         typealias ObjectIdentifier = SectionType
         var type: SectionType
         var totalItems: Int
