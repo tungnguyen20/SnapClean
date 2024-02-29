@@ -17,5 +17,6 @@ struct AssetSection {
 enum AssetSectionStyle {
     case focusGrid
     case normalGrid
-    case horizontal
+    case horizontalSquare
+    case horizontalRect
 }

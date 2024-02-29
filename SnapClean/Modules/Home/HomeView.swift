@@ -6,10 +6,13 @@
 //
 
 import SwiftUI
+import Photos
 
 struct HomeView: View {
-    @StateObject var viewModel = HomeViewModel()
     @EnvironmentObject var photoLoader: PhotosLoader
+    @State var selectedCategory: AssetCategory?
+    
+    var categories: [AssetCategory] = [.largeFiles, .screenshots, .similars, .duplicates]
     
     var body: some View {
         VStack {
@@ -20,12 +23,19 @@ struct HomeView: View {
                 Image("setting")
             }
             
-            ScrollView {
-                ForEach(viewModel.sections) { section in
-                    HomeSectionView(section: section) {
-                        
+            ScrollView(showsIndicators: false) {
+                VStack {
+                    ForEach(categories) { category in
+                        NavigationLink {
+                            AssetListView(category: category)
+                                .navigationBarHidden(true)
+                                .environmentObject(photoLoader)
+                        } label: {
+                            HomeSectionView(category: category)
+                                .frame(maxWidth: .infinity)
+                                .environmentObject(photoLoader)
+                        }
                     }
-                    .environmentObject(photoLoader)
                 }
             }
         }
@@ -34,55 +44,96 @@ struct HomeView: View {
     }
 }
 
-#Preview {
-    HomeView(viewModel: .init())
-}
-
 struct HomeSectionView: View {
     @EnvironmentObject var photoLoader: PhotosLoader
-    var section: HomeViewModel.Section
+    var category: AssetCategory
     @State var showDetail: Bool = false
-    var onSelect: () -> ()
+    
+    var totalItems: Int {
+        switch category {
+        case .largeFiles:
+            return photoLoader.largeAssets.reduce(0, { $0 + $1.assets.count })
+        case .screenshots:
+            return photoLoader.screenshots.reduce(0, { $0 + $1.assets.count })
+        default:
+            return photoLoader.duplicatedPhotos.reduce(0, { $0 + $1.assets.count })
+        }
+    }
+    
+    var totalItemSize: Float {
+        switch category {
+        case .largeFiles:
+            return photoLoader.largeAssets.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.metadata[$1.localIdentifier]?.sizeOnDisk ?? 0) })
+        case .screenshots:
+            return photoLoader.screenshots.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.metadata[$1.localIdentifier]?.sizeOnDisk ?? 0) })
+        case .duplicates:
+            return photoLoader.duplicatedPhotos.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.metadata[$1.localIdentifier]?.sizeOnDisk ?? 0) })
+        default:
+            return 0
+        }
+    }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(section.type.title)
+                    Text(category.title)
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(Color.textPrimary)
-                    Text("\(section.totalItems) items • \(section.totalSize / (1024 * 1024)) GB")
+                    Text("\(totalItems) items • \(totalItemSize.displayText)")
                         .font(.system(size: 16))
                         .foregroundStyle(Color.textSecondary)
                 }
                 Spacer()
-                NavigationLink(isActive: $showDetail) {
-                    switch section.type {
-                    case .screenshots:
-                        ScreenshotAssetListView()
-                            .navigationBarHidden(true)
-                            .environmentObject(photoLoader)
-                    default:
-                        DefaultAssetListView()
-                            .navigationBarHidden(true)
-                            .environmentObject(photoLoader)
-                    }
-                } label: {
-                    Button(action: {
-                        showDetail = true
-                    }, label: {
-                        Text("Review")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(Color.brand)
-                            .padding(16)
-                            .background(Color.gray100)
-                            .clipShape(Capsule())
-                    })
-                }
+                Text("Review")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(Color.brand)
+                    .padding(16)
+                    .background(Color.gray100)
+                    .clipShape(Capsule())
             }
+            createGrid(width: UIScreen.main.bounds.width - 64, category: category)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .padding(.vertical, 16)
         }
         .padding(16)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+    
+    @ViewBuilder
+    func createGrid(width: CGFloat, category: AssetCategory) -> some View {
+        let assets: [PHAsset] = {
+            switch category {
+            case .largeFiles:
+                return photoLoader.largeAssets.flatMap(\.assets)
+            case .screenshots:
+                return photoLoader.screenshots.flatMap(\.assets)
+            case .similars:
+                return []
+            case .duplicates:
+                return photoLoader.duplicatedPhotos.flatMap(\.assets)
+            }
+        }()
+        let itemsPerRow = category == .largeFiles ? 3 : 4
+        let maxItems = category == .largeFiles ? 6 : 4
+        LazyVGrid(
+            columns: Array(repeating: .init(.flexible(), spacing: 4), count: itemsPerRow),
+            spacing: 2
+        ) {
+            ForEach(Array(assets.enumerated().prefix(maxItems)), id: \.offset) { index, asset in
+                ZStack {
+                    ThumbnailView(assetLocalId: asset.localIdentifier)
+                        .frame(width: width / CGFloat(itemsPerRow), height: width / CGFloat(itemsPerRow))
+                    
+                    if index == maxItems - 1, assets.count - maxItems > 0 {
+                        Color.gray50
+                        Text("+\(assets.count - maxItems)")
+                            .font(.system(size: 22))
+                            .foregroundStyle(Color.white)
+                    }
+                }
+            }
+        }
     }
 }
