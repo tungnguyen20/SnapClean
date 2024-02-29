@@ -20,7 +20,7 @@ class AssetListViewModel: ObservableObject {
         $selectingLocalIds
             .sink { localIds in
                 self.totalSelectedItems = localIds.count
-                self.totalSelectedItemsSize = localIds.reduce(0, { $0 + (self.photoLoader?.metadata[$1]?.sizeOnDisk ?? 0) })
+                self.totalSelectedItemsSize = localIds.reduce(0, { $0 + (self.photoLoader?.assetResourceCache.value(forKey: $1)?.sizeOnDisk ?? 0) })
             }
             .store(in: &cancellables)
         

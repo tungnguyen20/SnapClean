@@ -50,27 +50,35 @@ struct HomeSectionView: View {
     @State var showDetail: Bool = false
     
     var totalItems: Int {
-        switch category {
-        case .largeFiles:
-            return photoLoader.largeAssets.reduce(0, { $0 + $1.assets.count })
-        case .screenshots:
-            return photoLoader.screenshots.reduce(0, { $0 + $1.assets.count })
-        default:
-            return photoLoader.duplicatedPhotos.reduce(0, { $0 + $1.assets.count })
-        }
+        let sections: [AssetSection] = {
+            switch category {
+            case .largeFiles:
+                return photoLoader.largeAssets
+            case .screenshots:
+                return photoLoader.screenshots
+            case .duplicates:
+                return photoLoader.duplicatedPhotos
+            case .similars:
+                return []
+            }
+        }()
+        return sections.reduce(0, { $0 + $1.assets.count })
     }
     
     var totalItemSize: Float {
-        switch category {
-        case .largeFiles:
-            return photoLoader.largeAssets.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.metadata[$1.localIdentifier]?.sizeOnDisk ?? 0) })
-        case .screenshots:
-            return photoLoader.screenshots.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.metadata[$1.localIdentifier]?.sizeOnDisk ?? 0) })
-        case .duplicates:
-            return photoLoader.duplicatedPhotos.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.metadata[$1.localIdentifier]?.sizeOnDisk ?? 0) })
-        default:
-            return 0
-        }
+        let sections: [AssetSection] = {
+            switch category {
+            case .largeFiles:
+                return photoLoader.largeAssets
+            case .screenshots:
+                return photoLoader.screenshots
+            case .duplicates:
+                return photoLoader.duplicatedPhotos
+            case .similars:
+                return []
+            }
+        }()
+        return sections.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.assetResourceCache.value(forKey: $1.localIdentifier)?.sizeOnDisk ?? 0) })
     }
     
     var body: some View {

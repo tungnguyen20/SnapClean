@@ -105,7 +105,7 @@ struct DetailThumbnailView: View {
             
             VStack {
                 HStack(alignment: .top) {
-                    Text(photoLoader.metadata[assetLocalId]?.sizeOnDisk.displayText ?? "0 KB")
+                    Text(photoLoader.assetResourceCache.value(forKey: assetLocalId)?.sizeOnDisk.displayText ?? "0 KB")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(Color.white)
                         .padding(6)
@@ -133,7 +133,7 @@ struct DetailThumbnailView: View {
                 
                 Spacer()
                 
-                if photoLoader.metadata[assetLocalId]?.resource?.type == .video {
+                if photoLoader.assetResourceCache[assetLocalId]?.isVideo ?? false {
                     HStack {
                         Spacer()
                         
