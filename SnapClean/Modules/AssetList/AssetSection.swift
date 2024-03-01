@@ -9,6 +9,7 @@ import SwiftUI
 import Photos
 
 struct AssetSection {
+    let id: String = UUID().uuidString
     var title: String
     var assets: [PHAsset]
     var style: AssetSectionStyle

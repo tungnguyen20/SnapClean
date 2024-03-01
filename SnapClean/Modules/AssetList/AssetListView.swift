@@ -47,7 +47,7 @@ struct AssetListView: View {
                 return []
             }
         }()
-        return sections.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.assetResourceCache.value(forKey: $1.localIdentifier)?.sizeOnDisk ?? 0) })
+        return sections.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.assetMetadataCache[$1.localIdentifier]?.sizeOnDisk ?? 0) })
     }
     
     var body: some View {
@@ -97,14 +97,14 @@ struct AssetListView: View {
                     List {
                         switch category {
                         case .largeFiles:
-                            ForEach(photoLoader.largeAssets, id: \.title) { section in
+                            ForEach(photoLoader.largeAssets, id: \.id) { section in
                                 createAssetsSectionView(width: proxy.size.width, section: section)
                                     .buttonStyle(PlainButtonStyle())
                                     .listRowInsets(EdgeInsets())
                                     .listRowSeparator(.hidden)
                             }
                         case .screenshots:
-                            ForEach(photoLoader.screenshots, id: \.title) { section in
+                            ForEach(photoLoader.screenshots, id: \.id) { section in
                                 createAssetsSectionView(width: proxy.size.width, section: section)
                                     .buttonStyle(PlainButtonStyle())
                                     .listRowInsets(EdgeInsets())
@@ -113,7 +113,7 @@ struct AssetListView: View {
                         case .similars:
                             EmptyView()
                         case .duplicates:
-                            ForEach(photoLoader.duplicatedPhotos, id: \.title) { section in
+                            ForEach(photoLoader.duplicatedPhotos, id: \.id) { section in
                                 createAssetsSectionView(width: proxy.size.width, section: section)
                                     .buttonStyle(PlainButtonStyle())
                                     .listRowInsets(EdgeInsets())
@@ -227,7 +227,7 @@ struct AssetListView: View {
     func createHorizontalRectList(width: CGFloat, assets: [PHAsset]) -> some View {
         ScrollView(.horizontal) {
             LazyHStack {
-                ForEach(assets, id: \.localIdentifier) { asset in
+                ForEach(assets, id: \.self) { asset in
                     createThumbnailView(asset: asset)
                         .frame(width: width / 3.3, height: width / 3.3 * 1.5)
                 }
@@ -239,7 +239,7 @@ struct AssetListView: View {
     func createHorizontalSquareList(width: CGFloat, assets: [PHAsset]) -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 1) {
-                ForEach(assets, id: \.localIdentifier) { asset in
+                ForEach(assets, id: \.self) { asset in
                     createThumbnailView(asset: asset)
                         .frame(width: width / 3.3, height: width / 3.3)
                 }

@@ -78,7 +78,7 @@ struct HomeSectionView: View {
                 return []
             }
         }()
-        return sections.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.assetResourceCache.value(forKey: $1.localIdentifier)?.sizeOnDisk ?? 0) })
+        return sections.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.assetMetadataCache[$1.localIdentifier]?.sizeOnDisk ?? 0) })
     }
     
     var body: some View {

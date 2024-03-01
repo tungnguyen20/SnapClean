@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		A60EA81B2B907462003E6495 /* AssetsError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A60EA81A2B907462003E6495 /* AssetsError.swift */; };
-		A60EA81D2B909035003E6495 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A60EA81C2B909035003E6495 /* Cache.swift */; };
 		A6F52A322B8CF9320008F8B4 /* SnapCleanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A312B8CF9320008F8B4 /* SnapCleanApp.swift */; };
 		A6F52A342B8CF9320008F8B4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A332B8CF9320008F8B4 /* ContentView.swift */; };
 		A6F52A362B8CF9330008F8B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A6F52A352B8CF9330008F8B4 /* Assets.xcassets */; };
@@ -32,7 +31,6 @@
 
 /* Begin PBXFileReference section */
 		A60EA81A2B907462003E6495 /* AssetsError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetsError.swift; sourceTree = "<group>"; };
-		A60EA81C2B909035003E6495 /* Cache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
 		A6F52A2E2B8CF9320008F8B4 /* SnapClean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SnapClean.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6F52A312B8CF9320008F8B4 /* SnapCleanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapCleanApp.swift; sourceTree = "<group>"; };
 		A6F52A332B8CF9320008F8B4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -169,7 +167,6 @@
 			isa = PBXGroup;
 			children = (
 				A6F52A582B8E01300008F8B4 /* PhotosLoader.swift */,
-				A60EA81C2B909035003E6495 /* Cache.swift */,
 			);
 			path = Manager;
 			sourceTree = "<group>";
@@ -263,7 +260,6 @@
 				A6F52A322B8CF9320008F8B4 /* SnapCleanApp.swift in Sources */,
 				A6F52A6E2B8F9F1F0008F8B4 /* AssetSection.swift in Sources */,
 				A6F52A492B8CFD030008F8B4 /* HomeView.swift in Sources */,
-				A60EA81D2B909035003E6495 /* Cache.swift in Sources */,
 				A6F52A752B9058350008F8B4 /* AssetCategory.swift in Sources */,
 				A6F52A5E2B8E019C0008F8B4 /* ThumbnailView.swift in Sources */,
 				A6F52A4B2B8CFDDD0008F8B4 /* Fonts.swift in Sources */,

@@ -31,7 +31,7 @@ class PhotosLoader: ObservableObject {
     var largeAssets: [AssetSection] = []
     var screenshots: [AssetSection] = []
     var duplicatedPhotos: [AssetSection] = []
-    let assetResourceCache = Cache<String, PHAssetMetadata>()
+    var assetMetadataCache = [String: PHAssetMetadata]()
     var assetMd5: [String: [UInt8]] = [:]
     
     init() {
@@ -46,12 +46,12 @@ class PhotosLoader: ObservableObject {
         
         if let allAssets {
             fetchAssetsMetadata(assets: allAssets)
-            try? assetResourceCache.saveToDisk(with: "metadata")
+//            try? assetResourceCache.saveToDisk(with: "metadata")
             await fetchAssetsMd5()
 //            try? assetMd5.saveToDisk(with: "md5")
             largeAssets = fetchAssetsGroupByDate(fetchResult: result)
             screenshots = await fetchScreenshots()
-//            duplicatedPhotos = await fetchDuplicatedPhotos()
+            duplicatedPhotos = await fetchDuplicatedPhotos()
         }
     }
     
@@ -59,7 +59,7 @@ class PhotosLoader: ObservableObject {
         assets.forEach { asset in
             if let resource = PHAssetResource.assetResources(for: asset).first {
                 let metadata = PHAssetMetadata(sizeOnDisk: resource.sizeOnDisk, isVideo: resource.type == .video)
-                assetResourceCache.insert(metadata, forKey: asset.localIdentifier)
+                assetMetadataCache[asset.localIdentifier] = metadata
             }
         }
     }
@@ -91,7 +91,7 @@ class PhotosLoader: ObservableObject {
             return AssetSection(
                 title: date.displayText,
                 assets: PHFetchResultCollection(fetchResult: assets).sorted(by: { lhs, rhs in
-                    return (assetResourceCache.value(forKey: lhs.localIdentifier)?.sizeOnDisk ?? 0) > (assetResourceCache.value(forKey: rhs.localIdentifier)?.sizeOnDisk ?? 0)
+                    return (assetMetadataCache[lhs.localIdentifier]?.sizeOnDisk ?? 0) > (assetMetadataCache[rhs.localIdentifier]?.sizeOnDisk ?? 0)
                 }),
                 style: .normalGrid
             )
@@ -164,8 +164,8 @@ class PhotosLoader: ObservableObject {
                 }
             }
         }
-        
-        return hashTable.filter { $0.value.count > 1 }.map { (key, assets) in
+        let duplicated = hashTable.values.filter { $0.count > 1 }
+        return duplicated.map { assets in
             return AssetSection(title: "\(assets.count) duplicates", assets: assets, style: .horizontalSquare)
         }
     }
