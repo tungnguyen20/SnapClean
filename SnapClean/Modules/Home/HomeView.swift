@@ -12,7 +12,7 @@ struct HomeView: View {
     @EnvironmentObject var photoLoader: PhotosLoader
     @State var selectedCategory: AssetCategory?
     
-    var categories: [AssetCategory] = [.largeFiles, .screenshots, .similars, .duplicates]
+    var categories: [AssetCategory] = [.all, .largeFiles, .screenshots, .similars, .duplicates]
     
     var body: some View {
         VStack {
@@ -41,6 +41,11 @@ struct HomeView: View {
         }
         .padding(.horizontal, 16)
         .background(Image("bg"))
+        .onAppear {
+            Task {
+                await photoLoader.reloadData()
+            }
+        }
     }
 }
 
@@ -51,6 +56,8 @@ struct HomeSectionView: View {
     
     var sections: [AssetSection] {
         switch category {
+        case .all:
+            return photoLoader.allAssets
         case .largeFiles:
             return photoLoader.largeAssets
         case .screenshots:
@@ -67,7 +74,18 @@ struct HomeSectionView: View {
     }
     
     var totalItemSize: Float {
-        return sections.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.assetMetadataCache[$1.localIdentifier]?.sizeOnDisk ?? 0) })
+        switch category {
+        case .all:
+            return photoLoader.allAssetsSize
+        case .largeFiles:
+            return photoLoader.largeAssetsSize
+        case .similars:
+            return photoLoader.similarPhotosSize
+        case .duplicates:
+            return photoLoader.duplicatedPhotosSize
+        case .screenshots:
+            return photoLoader.screenshotsSize
+        }
     }
     
     var body: some View {
@@ -102,6 +120,8 @@ struct HomeSectionView: View {
     func createGrid(width: CGFloat, category: AssetCategory) -> some View {
         let assets: [PHAsset] = {
             switch category {
+            case .all:
+                return photoLoader.allAssets.flatMap(\.assets)
             case .largeFiles:
                 return photoLoader.largeAssets.flatMap(\.assets)
             case .screenshots:

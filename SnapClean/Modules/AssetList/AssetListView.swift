@@ -20,6 +20,8 @@ struct AssetListView: View {
     
     var sections: [AssetSection] {
         switch category {
+        case .all:
+            return photoLoader.allAssets
         case .largeFiles:
             return photoLoader.largeAssets
         case .screenshots:
@@ -36,7 +38,18 @@ struct AssetListView: View {
     }
     
     var totalItemSize: Float {
-        return sections.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.assetMetadataCache[$1.localIdentifier]?.sizeOnDisk ?? 0) })
+        switch category {
+        case .all:
+            return photoLoader.allAssetsSize
+        case .largeFiles:
+            return photoLoader.largeAssetsSize
+        case .similars:
+            return photoLoader.similarPhotosSize
+        case .duplicates:
+            return photoLoader.duplicatedPhotosSize
+        case .screenshots:
+            return photoLoader.screenshotsSize
+        }
     }
     
     var body: some View {

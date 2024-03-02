@@ -13,6 +13,7 @@ enum AssetCategory: String, Identifiable {
         rawValue
     }
     
+    case all
     case largeFiles
     case screenshots
     case similars
@@ -20,6 +21,8 @@ enum AssetCategory: String, Identifiable {
     
     var title: String {
         switch self {
+        case .all:
+            return "All files"
         case .largeFiles:
             return "Large files"
         case .screenshots:

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Photos
 
 @main
 struct SnapCleanApp: App {
@@ -25,9 +26,18 @@ struct SnapCleanApp: App {
                         .background(Image("bg"))
                         .navigationBarHidden(true)
                         .onAppear {
-                            Task {
-                                await photoLoader.load()
-                                isLoadingCompleted = true
+                            PHPhotoLibrary.requestAuthorization(for: .readWrite) { (status) in
+                                switch status {
+                                case .authorized:
+                                    let date = Date()
+                                    photoLoader.fetchAllAssets()
+                                    print("TOTAL", Date().timeIntervalSince(date))
+                                    DispatchQueue.main.async {
+                                        isLoadingCompleted = true
+                                    }
+                                default:
+                                    ()
+                                }
                             }
                         }
                 }

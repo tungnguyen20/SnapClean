@@ -27,14 +27,22 @@ extension PHAssetResource {
 class PhotosLoader: ObservableObject {
     var imageCachingManager = PHCachingImageManager()
     let imageManager = PHImageManager.default()
-    var allAssets: PHFetchResultCollection?
-    var largeAssets: [AssetSection] = []
-    var screenshots: [AssetSection] = []
-    var duplicatedPhotos: [AssetSection] = []
-    var similarPhotos: [AssetSection] = []
+    @Published var allAssets: [AssetSection] = []
+    @Published var largeAssets: [AssetSection] = []
+    @Published var screenshots: [AssetSection] = []
+    @Published var duplicatedPhotos: [AssetSection] = []
+    @Published var similarPhotos: [AssetSection] = []
+    
     var assetMetadataCache = [String: PHAssetMetadata]()
     var assetMd5: [String: [UInt8]] = [:]
     var lastUpdatedTime: Date?
+    let minLargeFileSize: Float = 5 * 1024 * 1024
+    
+    @Published var allAssetsSize: Float = 0
+    @Published var largeAssetsSize: Float = 0
+    @Published var screenshotsSize: Float = 0
+    @Published var duplicatedPhotosSize: Float = 0
+    @Published var similarPhotosSize: Float = 0
     
     init() {
         assetMetadataCache = loadStorageMetadata()
@@ -42,24 +50,57 @@ class PhotosLoader: ObservableObject {
         lastUpdatedTime = UserDefaults.standard.object(forKey: "last_updated_time") as? Date
     }
     
-    func load() async {
-        let options = PHFetchOptions()
-        options.sortDescriptors = [.init(key: "creationDate", ascending: false)]
-        let result = PHAsset.fetchAssets(with: options)
-        allAssets = PHFetchResultCollection(fetchResult: result)
-        
-        // Fetch data and cache
+    func reloadData() async {
         fetchAssetsMetadata()
         saveMetadataToDisk(data: assetMetadataCache)
+        
+        Task { @MainActor in
+            largeAssets = fetchLargeAssets()
+            allAssetsSize = getTotalSize(sections: allAssets)
+            largeAssetsSize = getTotalSize(sections: largeAssets)
+            similarPhotosSize = getTotalSize(sections: similarPhotos)
+        }
+        
         await fetchAssetsMd5()
         saveMd5ToDisk(data: assetMd5)
         UserDefaults.standard.setValue(Date(), forKey: "last_updated_time")
         
-        // Fetch new data
-        largeAssets = fetchAssetsGroupByDate(fetchResult: result)
-        screenshots = await fetchScreenshots()
-        duplicatedPhotos = await fetchDuplicatedPhotos()
+        Task { @MainActor in
+            // Fetch new data
+            screenshots = await fetchScreenshots()
+            screenshotsSize = getTotalSize(sections: screenshots)
+            
+            duplicatedPhotos = await fetchDuplicatedPhotos()
+            duplicatedPhotosSize = getTotalSize(sections: duplicatedPhotos)
+        }
+    }
+    
+    func getTotalSize(sections: [AssetSection]) -> Float {
+        return sections.flatMap(\.assets).reduce(0, { $0 + (assetMetadataCache[$1.localIdentifier]?.sizeOnDisk ?? 0) })
+    }
+    
+    func fetchAllAssets() {
+        let options = PHFetchOptions()
+        options.sortDescriptors = [.init(key: "creationDate", ascending: false)]
+        
+        let result = PHAsset.fetchAssets(with: options)
+        allAssets = fetchAllAssetsGroupByDate(fetchResult: result)
         similarPhotos = fetchSimilarAssets()
+    }
+    
+    func fetchLargeAssets() -> [AssetSection] {
+        return allAssets.compactMap { section -> AssetSection? in
+            let assets = section.assets.filter {
+                return (assetMetadataCache[$0.localIdentifier]?.sizeOnDisk ?? 0) > minLargeFileSize
+            }
+            if assets.isEmpty {
+                return nil
+            } else {
+                return .init(title: section.title, assets: assets.sorted(by: { lhs, rhs in
+                    return (assetMetadataCache[lhs.localIdentifier]?.sizeOnDisk ?? 0) > (assetMetadataCache[rhs.localIdentifier]?.sizeOnDisk ?? 0)
+                }), style: section.style)
+            }
+        }
     }
     
     func fetchAssetsMetadata() {
@@ -77,23 +118,25 @@ class PhotosLoader: ObservableObject {
         }
     }
     
-    func fetchAssetsGroupByDate(fetchResult: PHFetchResult<PHAsset>) -> [AssetSection] {
-        let assets = PHFetchResultCollection(fetchResult: fetchResult)
-        let groups = Dictionary(grouping: assets) { element in
-            return Calendar.current.startOfDay(for: element.creationDate ?? Date())
-        }
-        let sections = groups.keys.sorted(by: >).map { date in
-            let options = PHFetchOptions()
-            let nextDate = Calendar.current.date(byAdding: .init(day: 1), to: date)!
-            options.predicate = NSPredicate(format: "creationDate >= %@ AND creationDate < %@", date as NSDate, nextDate as NSDate)
-            let assets = PHAsset.fetchAssets(with: options)
-            return AssetSection(
-                title: date.displayText,
-                assets: PHFetchResultCollection(fetchResult: assets).sorted(by: { lhs, rhs in
-                    return (assetMetadataCache[lhs.localIdentifier]?.sizeOnDisk ?? 0) > (assetMetadataCache[rhs.localIdentifier]?.sizeOnDisk ?? 0)
-                }),
-                style: .normalGrid
-            )
+    func fetchAllAssetsGroupByDate(fetchResult: PHFetchResult<PHAsset>) -> [AssetSection] {
+        var sections = [AssetSection]()
+        var currentDate: Date?
+        var currentSection: AssetSection?
+        fetchResult.enumerateObjects { asset, index, stop in
+            let date = Calendar.current.startOfDay(for: asset.creationDate ?? Date())
+            if date != currentDate {
+                if let currentSection = currentSection {
+                    sections.append(currentSection)
+                }
+                currentSection = AssetSection(
+                    title: date.displayText,
+                    assets: [asset],
+                    style: .normalGrid
+                )
+                currentDate = date
+            } else {
+                currentSection?.assets.append(asset)
+            }
         }
         return sections
     }
