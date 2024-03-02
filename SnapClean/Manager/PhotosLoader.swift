@@ -33,16 +33,16 @@ class PhotosLoader: ObservableObject {
     @Published var duplicatedPhotos: [AssetSection] = []
     @Published var similarPhotos: [AssetSection] = []
     
-    var assetMetadataCache = [String: PHAssetMetadata]()
-    var assetMd5: [String: [UInt8]] = [:]
-    var lastUpdatedTime: Date?
-    let minLargeFileSize: Float = 5 * 1024 * 1024
-    
     @Published var allAssetsSize: Float = 0
     @Published var largeAssetsSize: Float = 0
     @Published var screenshotsSize: Float = 0
     @Published var duplicatedPhotosSize: Float = 0
     @Published var similarPhotosSize: Float = 0
+    
+    var assetMetadataCache = [String: PHAssetMetadata]()
+    var assetMd5: [String: [UInt8]] = [:]
+    var lastUpdatedTime: Date?
+    let minLargeFileSize: Float = 5 * 1024 * 1024
     
     init() {
         assetMetadataCache = loadStorageMetadata()
