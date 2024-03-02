@@ -31,11 +31,15 @@ class PhotosLoader: ObservableObject {
     var largeAssets: [AssetSection] = []
     var screenshots: [AssetSection] = []
     var duplicatedPhotos: [AssetSection] = []
+    var similarPhotos: [AssetSection] = []
     var assetMetadataCache = [String: PHAssetMetadata]()
     var assetMd5: [String: [UInt8]] = [:]
+    var lastUpdatedTime: Date?
     
     init() {
-        
+        assetMetadataCache = loadStorageMetadata()
+        assetMd5 = loadStorageMd5()
+        lastUpdatedTime = UserDefaults.standard.object(forKey: "last_updated_time") as? Date
     }
     
     func load() async {
@@ -44,37 +48,32 @@ class PhotosLoader: ObservableObject {
         let result = PHAsset.fetchAssets(with: options)
         allAssets = PHFetchResultCollection(fetchResult: result)
         
-        if let allAssets {
-            fetchAssetsMetadata(assets: allAssets)
-//            try? assetResourceCache.saveToDisk(with: "metadata")
-            await fetchAssetsMd5()
-//            try? assetMd5.saveToDisk(with: "md5")
-            largeAssets = fetchAssetsGroupByDate(fetchResult: result)
-            screenshots = await fetchScreenshots()
-            duplicatedPhotos = await fetchDuplicatedPhotos()
-        }
+        // Fetch data and cache
+        fetchAssetsMetadata()
+        saveMetadataToDisk(data: assetMetadataCache)
+        await fetchAssetsMd5()
+        saveMd5ToDisk(data: assetMd5)
+        UserDefaults.standard.setValue(Date(), forKey: "last_updated_time")
+        
+        // Fetch new data
+        largeAssets = fetchAssetsGroupByDate(fetchResult: result)
+        screenshots = await fetchScreenshots()
+        duplicatedPhotos = await fetchDuplicatedPhotos()
+        similarPhotos = fetchSimilarAssets()
     }
     
-    func fetchAssetsMetadata(assets: PHFetchResultCollection) {
-        assets.forEach { asset in
+    func fetchAssetsMetadata() {
+        let options = PHFetchOptions()
+        options.sortDescriptors = [.init(key: "creationDate", ascending: false)]
+        if let lastUpdatedTime = lastUpdatedTime as? NSDate {
+            options.predicate = NSPredicate(format: "creationDate > %@ OR modificationDate > %@", lastUpdatedTime, lastUpdatedTime)
+        }
+        let result = PHAsset.fetchAssets(with: options)
+        result.enumerateObjects { asset, index, stop in
             if let resource = PHAssetResource.assetResources(for: asset).first {
                 let metadata = PHAssetMetadata(sizeOnDisk: resource.sizeOnDisk, isVideo: resource.type == .video)
-                assetMetadataCache[asset.localIdentifier] = metadata
+                self.assetMetadataCache[asset.localIdentifier] = metadata
             }
-        }
-    }
-    
-    func featurePrintForImage(image: UIImage) -> VNFeaturePrintObservation? {
-        let requestHandler = VNImageRequestHandler(
-            cgImage: image.cgImage!,
-            options: [:]
-        )
-        do {
-            let request = VNGenerateImageFeaturePrintRequest()
-            try requestHandler.perform([request])
-            return request.results?.first as? VNFeaturePrintObservation
-        } catch {
-            return nil
         }
     }
     
@@ -101,7 +100,11 @@ class PhotosLoader: ObservableObject {
     
     func fetchAssetsMd5() async {
         let options = PHFetchOptions()
-        options.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
+        let lastUpdatedTime = (lastUpdatedTime ?? Date(timeIntervalSince1970: 0)) as NSDate
+        options.predicate = NSPredicate(
+            format: "mediaType = %d AND (creationDate > %@ OR modificationDate > %@)",
+            PHAssetMediaType.image.rawValue, lastUpdatedTime, lastUpdatedTime
+        )
         let result = PHAsset.fetchAssets(with: options)
         let assets = PHFetchResultCollection(fetchResult: result)
         let _ = await withTaskGroup(of: (String, [UInt8])?.self) { group in
@@ -228,5 +231,73 @@ class PhotosLoader: ObservableObject {
             }
         }
     }
-        
+    
+    func fetchSimilarAssets() -> [AssetSection] {
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+        var assets = [AssetSection]()
+        var similarAssets = [PHAsset]()
+        var previousCreationDate: Date?
+        fetchResult.enumerateObjects { asset, index, stop in
+            if let previousCreationDate = previousCreationDate, abs(asset.creationDate!.timeIntervalSince(previousCreationDate)) < 1 {
+                similarAssets.append(asset)
+            } else {
+                if similarAssets.count > 1 {
+                    assets.append(.init(title: "\(similarAssets.count) similars", assets: similarAssets, style: .horizontalSquare))
+                }
+                similarAssets = [asset]
+            }
+            previousCreationDate = asset.creationDate
+        }
+        return assets
+    }
+    
+}
+
+extension PhotosLoader {
+    
+    func getDocumentFile(fileName: String) -> URL? {
+        let fileManager = FileManager.default
+        guard let documentDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            return nil
+        }
+        return documentDirectory.appendingPathComponent(fileName)
+    }
+    
+    func saveMetadataToDisk(data: [String: PHAssetMetadata]) {
+        let encoder = JSONEncoder()
+        if let jsonData = try? encoder.encode(data), let url = getDocumentFile(fileName: "metadata.json") {
+            try? jsonData.write(to: url)
+        }
+    }
+    
+    func saveMd5ToDisk(data: [String: [UInt8]]) {
+        let encoder = JSONEncoder()
+        if let jsonData = try? encoder.encode(data), let url = getDocumentFile(fileName: "md5.json") {
+            try? jsonData.write(to: url)
+        }
+    }
+    
+    func loadStorageMetadata() -> [String: PHAssetMetadata] {
+        if let url = getDocumentFile(fileName: "metadata.json"), let jsonData = try? Data(contentsOf: url) {
+            let decoder = JSONDecoder()
+            if let data = try? decoder.decode([String: PHAssetMetadata].self, from: jsonData) {
+                return data
+            }
+        }
+        return [:]
+    }
+    
+    func loadStorageMd5() -> [String: [UInt8]] {
+        if let url = getDocumentFile(fileName: "md5.json"), let jsonData = try? Data(contentsOf: url) {
+            let decoder = JSONDecoder()
+            if let data = try? decoder.decode([String: [UInt8]].self, from: jsonData) {
+                return data
+            }
+        }
+        return [:]
+    }
+    
 }

@@ -18,35 +18,24 @@ struct AssetListView: View {
         self.category = category
     }
     
+    var sections: [AssetSection] {
+        switch category {
+        case .largeFiles:
+            return photoLoader.largeAssets
+        case .screenshots:
+            return photoLoader.screenshots
+        case .duplicates:
+            return photoLoader.duplicatedPhotos
+        case .similars:
+            return photoLoader.similarPhotos
+        }
+    }
+    
     var totalItems: Int {
-        let sections: [AssetSection] = {
-            switch category {
-            case .largeFiles:
-                return photoLoader.largeAssets
-            case .screenshots:
-                return photoLoader.screenshots
-            case .duplicates:
-                return photoLoader.duplicatedPhotos
-            case .similars:
-                return []
-            }
-        }()
         return sections.reduce(0, { $0 + $1.assets.count })
     }
     
     var totalItemSize: Float {
-        let sections: [AssetSection] = {
-            switch category {
-            case .largeFiles:
-                return photoLoader.largeAssets
-            case .screenshots:
-                return photoLoader.screenshots
-            case .duplicates:
-                return photoLoader.duplicatedPhotos
-            case .similars:
-                return []
-            }
-        }()
         return sections.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.assetMetadataCache[$1.localIdentifier]?.sizeOnDisk ?? 0) })
     }
     
@@ -95,30 +84,11 @@ struct AssetListView: View {
                 
                 GeometryReader { proxy in
                     List {
-                        switch category {
-                        case .largeFiles:
-                            ForEach(photoLoader.largeAssets, id: \.id) { section in
-                                createAssetsSectionView(width: proxy.size.width, section: section)
-                                    .buttonStyle(PlainButtonStyle())
-                                    .listRowInsets(EdgeInsets())
-                                    .listRowSeparator(.hidden)
-                            }
-                        case .screenshots:
-                            ForEach(photoLoader.screenshots, id: \.id) { section in
-                                createAssetsSectionView(width: proxy.size.width, section: section)
-                                    .buttonStyle(PlainButtonStyle())
-                                    .listRowInsets(EdgeInsets())
-                                    .listRowSeparator(.hidden)
-                            }
-                        case .similars:
-                            EmptyView()
-                        case .duplicates:
-                            ForEach(photoLoader.duplicatedPhotos, id: \.id) { section in
-                                createAssetsSectionView(width: proxy.size.width, section: section)
-                                    .buttonStyle(PlainButtonStyle())
-                                    .listRowInsets(EdgeInsets())
-                                    .listRowSeparator(.hidden)
-                            }
+                        ForEach(sections, id: \.id) { section in
+                            createAssetsSectionView(width: proxy.size.width, section: section)
+                                .buttonStyle(PlainButtonStyle())
+                                .listRowInsets(EdgeInsets())
+                                .listRowSeparator(.hidden)
                         }
                     }
                     .listStyle(.plain)

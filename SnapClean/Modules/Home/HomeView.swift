@@ -49,35 +49,24 @@ struct HomeSectionView: View {
     var category: AssetCategory
     @State var showDetail: Bool = false
     
+    var sections: [AssetSection] {
+        switch category {
+        case .largeFiles:
+            return photoLoader.largeAssets
+        case .screenshots:
+            return photoLoader.screenshots
+        case .duplicates:
+            return photoLoader.duplicatedPhotos
+        case .similars:
+            return photoLoader.similarPhotos
+        }
+    }
+    
     var totalItems: Int {
-        let sections: [AssetSection] = {
-            switch category {
-            case .largeFiles:
-                return photoLoader.largeAssets
-            case .screenshots:
-                return photoLoader.screenshots
-            case .duplicates:
-                return photoLoader.duplicatedPhotos
-            case .similars:
-                return []
-            }
-        }()
         return sections.reduce(0, { $0 + $1.assets.count })
     }
     
     var totalItemSize: Float {
-        let sections: [AssetSection] = {
-            switch category {
-            case .largeFiles:
-                return photoLoader.largeAssets
-            case .screenshots:
-                return photoLoader.screenshots
-            case .duplicates:
-                return photoLoader.duplicatedPhotos
-            case .similars:
-                return []
-            }
-        }()
         return sections.flatMap { $0.assets }.reduce(0, { $0 + (photoLoader.assetMetadataCache[$1.localIdentifier]?.sizeOnDisk ?? 0) })
     }
     
@@ -118,7 +107,7 @@ struct HomeSectionView: View {
             case .screenshots:
                 return photoLoader.screenshots.flatMap(\.assets)
             case .similars:
-                return []
+                return photoLoader.similarPhotos.flatMap(\.assets)
             case .duplicates:
                 return photoLoader.duplicatedPhotos.flatMap(\.assets)
             }
