@@ -83,7 +83,7 @@ class PhotoManager: ObservableObject {
         }
     }
     
-    func reloadAllSections() {
+    func reloadAllCategories() {
         fetchAllAssets()
         Task { @MainActor in
             largeAssets = fetchLargeAssets()
@@ -241,52 +241,6 @@ class PhotoManager: ObservableObject {
         }
     }
     
-    func removeRequest(assetLocalId: String) {
-        requestIDs.setObject(key: assetLocalId, value: nil)
-    }
-    
-    func cancelRequest(assetLocalId: String) {
-        if let requestID = requestIDs.getValue(key: assetLocalId) {
-            imageCachingManager.cancelImageRequest(requestID)
-            requestIDs.setObject(key: assetLocalId, value: nil)
-        }
-    }
-    
-    func fetchImage(
-        byLocalIdentifier localId: String,
-        targetSize: CGSize = PHImageManagerMaximumSize,
-        contentMode: PHImageContentMode = .default
-    ) async throws -> UIImage? {
-        let results = PHAsset.fetchAssets(
-            withLocalIdentifiers: [localId],
-            options: nil
-        )
-        guard let asset = results.firstObject else {
-            return nil
-        }
-        let options = PHImageRequestOptions()
-        options.deliveryMode = .highQualityFormat
-        options.resizeMode = .fast
-        options.isNetworkAccessAllowed = true
-        options.isSynchronous = false
-        return try await withCheckedThrowingContinuation { [weak self] continuation in
-            let requestID = self?.imageCachingManager.requestImage(
-                for: asset,
-                targetSize: targetSize,
-                contentMode: contentMode,
-                options: options,
-                resultHandler: { image, info in
-                    if let error = info?[PHImageErrorKey] as? Error {
-                        continuation.resume(throwing: error)
-                        return
-                    }
-                    continuation.resume(returning: image)
-                }
-            )
-            self?.requestIDs.setObject(key: localId, value: requestID)
-        }
-    }
-    
     func fetchMd5(index: Int, asset: PHAsset) async throws -> (String, [UInt8]) {
         let imageManager = PHImageManager.default()
         let options = PHImageRequestOptions()
@@ -389,7 +343,57 @@ extension PhotoManager {
         try? await PHPhotoLibrary.shared().performChanges({
             PHAssetChangeRequest.deleteAssets(assets)
         })
-        self.reloadAllSections()
+        self.reloadAllCategories()
+    }
+    
+}
+
+extension PhotoManager {
+    
+    func removeRequest(assetLocalId: String) {
+        requestIDs.setObject(key: assetLocalId, value: nil)
+    }
+    
+    func cancelRequest(assetLocalId: String) {
+        if let requestID = requestIDs.getValue(key: assetLocalId) {
+            imageCachingManager.cancelImageRequest(requestID)
+            requestIDs.setObject(key: assetLocalId, value: nil)
+        }
+    }
+    
+    func fetchImage(
+        byLocalIdentifier localId: String,
+        targetSize: CGSize = PHImageManagerMaximumSize,
+        contentMode: PHImageContentMode = .default
+    ) async throws -> UIImage? {
+        let results = PHAsset.fetchAssets(
+            withLocalIdentifiers: [localId],
+            options: nil
+        )
+        guard let asset = results.firstObject else {
+            return nil
+        }
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .highQualityFormat
+        options.resizeMode = .fast
+        options.isNetworkAccessAllowed = true
+        options.isSynchronous = false
+        return try await withCheckedThrowingContinuation { [weak self] continuation in
+            let requestID = self?.imageCachingManager.requestImage(
+                for: asset,
+                targetSize: targetSize,
+                contentMode: contentMode,
+                options: options,
+                resultHandler: { image, info in
+                    if let error = info?[PHImageErrorKey] as? Error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+                    continuation.resume(returning: image)
+                }
+            )
+            self?.requestIDs.setObject(key: localId, value: requestID)
+        }
     }
     
 }
