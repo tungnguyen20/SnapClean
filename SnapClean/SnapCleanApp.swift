@@ -10,7 +10,6 @@ import Photos
 
 @main
 struct SnapCleanApp: App {
-    let persistenceController = PersistenceController.shared
     let photoManager = PhotoManager()
     @State var isLoadingCompleted: Bool = false
 

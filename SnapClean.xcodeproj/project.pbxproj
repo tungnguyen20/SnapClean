@@ -9,12 +9,10 @@
 /* Begin PBXBuildFile section */
 		A60EA81B2B907462003E6495 /* AssetsError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A60EA81A2B907462003E6495 /* AssetsError.swift */; };
 		A60EA8212B93988D003E6495 /* SelectableThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A60EA8202B93988D003E6495 /* SelectableThumbnailView.swift */; };
+		A6A0F8202B9433270098CBF9 /* SafeDict.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6A0F81F2B9433270098CBF9 /* SafeDict.swift */; };
 		A6F52A322B8CF9320008F8B4 /* SnapCleanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A312B8CF9320008F8B4 /* SnapCleanApp.swift */; };
-		A6F52A342B8CF9320008F8B4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A332B8CF9320008F8B4 /* ContentView.swift */; };
 		A6F52A362B8CF9330008F8B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A6F52A352B8CF9330008F8B4 /* Assets.xcassets */; };
 		A6F52A392B8CF9330008F8B4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A6F52A382B8CF9330008F8B4 /* Preview Assets.xcassets */; };
-		A6F52A3B2B8CF9330008F8B4 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A3A2B8CF9330008F8B4 /* Persistence.swift */; };
-		A6F52A3E2B8CF9330008F8B4 /* SnapClean.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A3C2B8CF9330008F8B4 /* SnapClean.xcdatamodeld */; };
 		A6F52A492B8CFD030008F8B4 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A482B8CFD030008F8B4 /* HomeView.swift */; };
 		A6F52A4B2B8CFDDD0008F8B4 /* Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A4A2B8CFDDD0008F8B4 /* Fonts.swift */; };
 		A6F52A532B8D02DF0008F8B4 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F52A522B8D02DF0008F8B4 /* Colors.swift */; };
@@ -33,13 +31,11 @@
 /* Begin PBXFileReference section */
 		A60EA81A2B907462003E6495 /* AssetsError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetsError.swift; sourceTree = "<group>"; };
 		A60EA8202B93988D003E6495 /* SelectableThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectableThumbnailView.swift; sourceTree = "<group>"; };
+		A6A0F81F2B9433270098CBF9 /* SafeDict.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeDict.swift; sourceTree = "<group>"; };
 		A6F52A2E2B8CF9320008F8B4 /* SnapClean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SnapClean.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6F52A312B8CF9320008F8B4 /* SnapCleanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapCleanApp.swift; sourceTree = "<group>"; };
-		A6F52A332B8CF9320008F8B4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A6F52A352B8CF9330008F8B4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A6F52A382B8CF9330008F8B4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		A6F52A3A2B8CF9330008F8B4 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
-		A6F52A3D2B8CF9330008F8B4 /* SnapClean.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SnapClean.xcdatamodel; sourceTree = "<group>"; };
 		A6F52A482B8CFD030008F8B4 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		A6F52A4A2B8CFDDD0008F8B4 /* Fonts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fonts.swift; sourceTree = "<group>"; };
 		A6F52A522B8D02DF0008F8B4 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
@@ -70,6 +66,7 @@
 			isa = PBXGroup;
 			children = (
 				A60EA81A2B907462003E6495 /* AssetsError.swift */,
+				A6A0F81F2B9433270098CBF9 /* SafeDict.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -100,9 +97,6 @@
 				A6F52A5A2B8E01780008F8B4 /* Views */,
 				A6F52A442B8CFAF70008F8B4 /* Modules */,
 				A6F52A312B8CF9320008F8B4 /* SnapCleanApp.swift */,
-				A6F52A332B8CF9320008F8B4 /* ContentView.swift */,
-				A6F52A3A2B8CF9330008F8B4 /* Persistence.swift */,
-				A6F52A3C2B8CF9330008F8B4 /* SnapClean.xcdatamodeld */,
 				A6F52A372B8CF9330008F8B4 /* Preview Content */,
 			);
 			path = SnapClean;
@@ -255,19 +249,17 @@
 				A6F52A712B902C6C0008F8B4 /* Int+.swift in Sources */,
 				A60EA81B2B907462003E6495 /* AssetsError.swift in Sources */,
 				A6F52A732B90539E0008F8B4 /* AssetListViewModel.swift in Sources */,
-				A6F52A3B2B8CF9330008F8B4 /* Persistence.swift in Sources */,
 				A6F52A562B8D04190008F8B4 /* Color+.swift in Sources */,
 				A6F52A532B8D02DF0008F8B4 /* Colors.swift in Sources */,
-				A6F52A342B8CF9320008F8B4 /* ContentView.swift in Sources */,
 				A6F52A592B8E01300008F8B4 /* PhotoManager.swift in Sources */,
 				A6F52A322B8CF9320008F8B4 /* SnapCleanApp.swift in Sources */,
+				A6A0F8202B9433270098CBF9 /* SafeDict.swift in Sources */,
 				A6F52A6E2B8F9F1F0008F8B4 /* AssetSection.swift in Sources */,
 				A6F52A492B8CFD030008F8B4 /* HomeView.swift in Sources */,
 				A6F52A752B9058350008F8B4 /* AssetCategory.swift in Sources */,
 				A6F52A5E2B8E019C0008F8B4 /* ThumbnailView.swift in Sources */,
 				A6F52A4B2B8CFDDD0008F8B4 /* Fonts.swift in Sources */,
 				A60EA8212B93988D003E6495 /* SelectableThumbnailView.swift in Sources */,
-				A6F52A3E2B8CF9330008F8B4 /* SnapClean.xcdatamodeld in Sources */,
 				A6F52A622B8F4E3D0008F8B4 /* PHFetchCollectionResult.swift in Sources */,
 				A6F52A602B8E43BE0008F8B4 /* AssetListView.swift in Sources */,
 				A6F52A662B8F7C600008F8B4 /* Date+.swift in Sources */,
@@ -482,19 +474,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		A6F52A3C2B8CF9330008F8B4 /* SnapClean.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				A6F52A3D2B8CF9330008F8B4 /* SnapClean.xcdatamodel */,
-			);
-			currentVersion = A6F52A3D2B8CF9330008F8B4 /* SnapClean.xcdatamodel */;
-			path = SnapClean.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = A6F52A262B8CF9310008F8B4 /* Project object */;
 }

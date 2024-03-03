@@ -12,34 +12,38 @@ struct ThumbnailView: View {
     @EnvironmentObject var photoManager: PhotoManager
     @State private var image: Image?
     var assetLocalId: String
+    @State var requestID: PHImageRequestID?
     
     init(assetLocalId: String) {
         self.assetLocalId = assetLocalId
     }
     
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            if let image = image {
-                GeometryReader { proxy in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(
-                            width: proxy.size.width,
-                            height: proxy.size.height
-                        )
-                        .clipped()
+        GeometryReader { proxy in
+            ZStack(alignment: .topLeading) {
+                if let image = image {
+                    GeometryReader { proxy in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(
+                                width: proxy.size.width,
+                                height: proxy.size.height
+                            )
+                            .clipped()
+                    }
+                } else {
+                    Rectangle()
+                        .foregroundColor(Color.gray100)
                 }
-            } else {
-                Rectangle()
-                    .foregroundColor(Color.gray100)
             }
-        }
-        .task {
-            await loadImageAsset()
-        }
-        .onDisappear {
-            image = nil
+            .task {
+                await loadImageAsset(targetSize: proxy.size)
+            }
+            .onDisappear {
+                image = nil
+                photoManager.cancelRequest(assetLocalId: assetLocalId)
+            }
         }
     }
     
@@ -52,8 +56,10 @@ struct ThumbnailView: View {
                 targetSize: targetSize
             ) else {
             image = nil
+            photoManager.removeRequest(assetLocalId: assetLocalId)
             return
         }
+        photoManager.removeRequest(assetLocalId: assetLocalId)
         image = Image(uiImage: uiImage)
     }
 }

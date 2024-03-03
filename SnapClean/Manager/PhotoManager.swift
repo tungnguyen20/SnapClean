@@ -43,6 +43,7 @@ class PhotoManager: ObservableObject {
     var assetMd5: [String: [UInt8]] = [:]
     var lastUpdatedTime: Date?
     let minLargeFileSize: Float = 5 * 1024 * 1024
+    var requestIDs = SafeDict()
     
     init() {
         assetMetadataCache = loadStorageMetadata()
@@ -240,6 +241,17 @@ class PhotoManager: ObservableObject {
         }
     }
     
+    func removeRequest(assetLocalId: String) {
+        requestIDs.setObject(key: assetLocalId, value: nil)
+    }
+    
+    func cancelRequest(assetLocalId: String) {
+        if let requestID = requestIDs.getValue(key: assetLocalId) {
+            imageCachingManager.cancelImageRequest(requestID)
+            requestIDs.setObject(key: assetLocalId, value: nil)
+        }
+    }
+    
     func fetchImage(
         byLocalIdentifier localId: String,
         targetSize: CGSize = PHImageManagerMaximumSize,
@@ -258,7 +270,7 @@ class PhotoManager: ObservableObject {
         options.isNetworkAccessAllowed = true
         options.isSynchronous = false
         return try await withCheckedThrowingContinuation { [weak self] continuation in
-            self?.imageCachingManager.requestImage(
+            let requestID = self?.imageCachingManager.requestImage(
                 for: asset,
                 targetSize: targetSize,
                 contentMode: contentMode,
@@ -271,6 +283,7 @@ class PhotoManager: ObservableObject {
                     continuation.resume(returning: image)
                 }
             )
+            self?.requestIDs.setObject(key: localId, value: requestID)
         }
     }
     
