@@ -11,7 +11,7 @@ import Photos
 @main
 struct SnapCleanApp: App {
     let persistenceController = PersistenceController.shared
-    let photoLoader = PhotosLoader()
+    let photoManager = PhotoManager()
     @State var isLoadingCompleted: Bool = false
 
     var body: some Scene {
@@ -20,7 +20,7 @@ struct SnapCleanApp: App {
                 NavigationLink(isActive: $isLoadingCompleted) {
                     HomeView()
                         .navigationBarHidden(true)
-                        .environmentObject(photoLoader)
+                        .environmentObject(photoManager)
                 } label: {
                     ProgressView()
                         .background(Image("bg"))
@@ -29,9 +29,6 @@ struct SnapCleanApp: App {
                             PHPhotoLibrary.requestAuthorization(for: .readWrite) { (status) in
                                 switch status {
                                 case .authorized:
-                                    let date = Date()
-                                    photoLoader.fetchAllAssets()
-                                    print("TOTAL", Date().timeIntervalSince(date))
                                     DispatchQueue.main.async {
                                         isLoadingCompleted = true
                                     }

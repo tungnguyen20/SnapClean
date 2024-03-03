@@ -24,7 +24,7 @@ extension PHAssetResource {
     
 }
 
-class PhotosLoader: ObservableObject {
+class PhotoManager: ObservableObject {
     var imageCachingManager = PHCachingImageManager()
     let imageManager = PHImageManager.default()
     @Published var allAssets: [AssetSection] = []
@@ -50,12 +50,17 @@ class PhotosLoader: ObservableObject {
         lastUpdatedTime = UserDefaults.standard.object(forKey: "last_updated_time") as? Date
     }
     
-    func reloadData() async {
+    func sizeOnDisk(assetLocalId: String) -> Float {
+        return assetMetadataCache[assetLocalId]?.sizeOnDisk ?? 0
+    }
+    
+    func loadOtherCategories() async {
         fetchAssetsMetadata()
         saveMetadataToDisk(data: assetMetadataCache)
         
+        let largeAssets = fetchLargeAssets()
         Task { @MainActor in
-            largeAssets = fetchLargeAssets()
+            self.largeAssets = largeAssets
             allAssetsSize = getTotalSize(sections: allAssets)
             largeAssetsSize = getTotalSize(sections: largeAssets)
             similarPhotosSize = getTotalSize(sections: similarPhotos)
@@ -65,18 +70,35 @@ class PhotosLoader: ObservableObject {
         saveMd5ToDisk(data: assetMd5)
         UserDefaults.standard.setValue(Date(), forKey: "last_updated_time")
         
+        let screenshots = fetchScreenshots()
+        let duplicated = fetchDuplicatedPhotos()
         Task { @MainActor in
             // Fetch new data
-            screenshots = await fetchScreenshots()
+            self.screenshots = screenshots
             screenshotsSize = getTotalSize(sections: screenshots)
             
-            duplicatedPhotos = await fetchDuplicatedPhotos()
+            self.duplicatedPhotos = duplicated
+            duplicatedPhotosSize = getTotalSize(sections: duplicatedPhotos)
+        }
+    }
+    
+    func reloadAllSections() {
+        fetchAllAssets()
+        Task { @MainActor in
+            largeAssets = fetchLargeAssets()
+            screenshots = fetchScreenshots()
+            duplicatedPhotos = fetchDuplicatedPhotos()
+            
+            allAssetsSize = getTotalSize(sections: allAssets)
+            largeAssetsSize = getTotalSize(sections: largeAssets)
+            similarPhotosSize = getTotalSize(sections: similarPhotos)
+            screenshotsSize = getTotalSize(sections: screenshots)
             duplicatedPhotosSize = getTotalSize(sections: duplicatedPhotos)
         }
     }
     
     func getTotalSize(sections: [AssetSection]) -> Float {
-        return sections.flatMap(\.assets).reduce(0, { $0 + (assetMetadataCache[$1.localIdentifier]?.sizeOnDisk ?? 0) })
+        return sections.flatMap(\.assets).reduce(0, { $0 + sizeOnDisk(assetLocalId: $1.localIdentifier) })
     }
     
     func fetchAllAssets() {
@@ -84,20 +106,22 @@ class PhotosLoader: ObservableObject {
         options.sortDescriptors = [.init(key: "creationDate", ascending: false)]
         
         let result = PHAsset.fetchAssets(with: options)
-        allAssets = fetchAllAssetsGroupByDate(fetchResult: result)
-        similarPhotos = fetchSimilarAssets()
+        Task { @MainActor in
+            allAssets = fetchAllAssetsGroupByDate(fetchResult: result)
+            similarPhotos = fetchSimilarAssets()
+        }
     }
     
     func fetchLargeAssets() -> [AssetSection] {
         return allAssets.compactMap { section -> AssetSection? in
             let assets = section.assets.filter {
-                return (assetMetadataCache[$0.localIdentifier]?.sizeOnDisk ?? 0) > minLargeFileSize
+                return sizeOnDisk(assetLocalId: $0.localIdentifier) > minLargeFileSize
             }
             if assets.isEmpty {
                 return nil
             } else {
                 return .init(title: section.title, assets: assets.sorted(by: { lhs, rhs in
-                    return (assetMetadataCache[lhs.localIdentifier]?.sizeOnDisk ?? 0) > (assetMetadataCache[rhs.localIdentifier]?.sizeOnDisk ?? 0)
+                    return sizeOnDisk(assetLocalId: lhs.localIdentifier) > sizeOnDisk(assetLocalId: rhs.localIdentifier)
                 }), style: section.style)
             }
         }
@@ -164,7 +188,7 @@ class PhotosLoader: ObservableObject {
         }
     }
     
-    func fetchScreenshots() async -> [AssetSection] {
+    func fetchScreenshots() -> [AssetSection] {
         let options = PHFetchOptions()
         options.sortDescriptors = [ NSSortDescriptor(key: "creationDate", ascending: true) ]
         options.predicate = NSPredicate(
@@ -193,7 +217,7 @@ class PhotosLoader: ObservableObject {
         return sections
     }
     
-    func fetchDuplicatedPhotos() async -> [AssetSection] {
+    func fetchDuplicatedPhotos() -> [AssetSection] {
         let fetchOptions = PHFetchOptions()
         fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
         let allPhotos = PHAsset.fetchAssets(with: fetchOptions)
@@ -299,7 +323,7 @@ class PhotosLoader: ObservableObject {
     
 }
 
-extension PhotosLoader {
+extension PhotoManager {
     
     func getDocumentFile(fileName: String) -> URL? {
         let fileManager = FileManager.default
@@ -341,6 +365,18 @@ extension PhotosLoader {
             }
         }
         return [:]
+    }
+    
+}
+
+extension PhotoManager {
+    
+    func remove(assetLocalIds: [String]) async {
+        let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetLocalIds, options: nil)
+        try? await PHPhotoLibrary.shared().performChanges({
+            PHAssetChangeRequest.deleteAssets(assets)
+        })
+        self.reloadAllSections()
     }
     
 }

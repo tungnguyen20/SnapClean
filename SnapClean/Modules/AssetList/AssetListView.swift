@@ -10,7 +10,7 @@ import Photos
 
 struct AssetListView: View {
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var photoLoader: PhotosLoader
+    @EnvironmentObject var photoManager: PhotoManager
     @StateObject var viewModel = AssetListViewModel()
     var category: AssetCategory
     
@@ -21,15 +21,15 @@ struct AssetListView: View {
     var sections: [AssetSection] {
         switch category {
         case .all:
-            return photoLoader.allAssets
+            return photoManager.allAssets
         case .largeFiles:
-            return photoLoader.largeAssets
+            return photoManager.largeAssets
         case .screenshots:
-            return photoLoader.screenshots
+            return photoManager.screenshots
         case .duplicates:
-            return photoLoader.duplicatedPhotos
+            return photoManager.duplicatedPhotos
         case .similars:
-            return photoLoader.similarPhotos
+            return photoManager.similarPhotos
         }
     }
     
@@ -40,15 +40,15 @@ struct AssetListView: View {
     var totalItemSize: Float {
         switch category {
         case .all:
-            return photoLoader.allAssetsSize
+            return photoManager.allAssetsSize
         case .largeFiles:
-            return photoLoader.largeAssetsSize
+            return photoManager.largeAssetsSize
         case .similars:
-            return photoLoader.similarPhotosSize
+            return photoManager.similarPhotosSize
         case .duplicates:
-            return photoLoader.duplicatedPhotosSize
+            return photoManager.duplicatedPhotosSize
         case .screenshots:
-            return photoLoader.screenshotsSize
+            return photoManager.screenshotsSize
         }
     }
     
@@ -122,10 +122,18 @@ struct AssetListView: View {
                     
                     Spacer()
                     
-                    Image("trash")
-                        .padding()
-                        .background(Color.brand)
-                        .clipShape(Circle())
+                    Button {
+                        Task {
+                            await photoManager.remove(assetLocalIds: Array(viewModel.selectingLocalIds))
+                            viewModel.selectingLocalIds.removeAll()
+                        }
+                    } label: {
+                        Image("trash")
+                            .padding()
+                            .background(Color.brand)
+                            .clipShape(Circle())
+                    }
+
                 }
                 .padding(16)
                 .background(Color.white.shadow(color: .black, radius: 10, y: 5))
@@ -137,13 +145,13 @@ struct AssetListView: View {
             
         }
         .onAppear {
-            viewModel.setup(photoLoader: photoLoader)
+            viewModel.setup(photoManager: photoManager)
         }
     }
     
     @ViewBuilder
     func createThumbnailView(asset: PHAsset) -> some View {
-        DetailThumbnailView(assetLocalId: asset.localIdentifier, isSelected: Binding<Bool>(
+        SelectableThumbnailView(assetLocalId: asset.localIdentifier, isSelected: Binding<Bool>(
             get: {
                 return viewModel.selectingLocalIds.contains(asset.localIdentifier)
             },

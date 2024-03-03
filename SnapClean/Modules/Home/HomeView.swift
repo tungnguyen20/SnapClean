@@ -9,7 +9,7 @@ import SwiftUI
 import Photos
 
 struct HomeView: View {
-    @EnvironmentObject var photoLoader: PhotosLoader
+    @EnvironmentObject var photoManager: PhotoManager
     @State var selectedCategory: AssetCategory?
     
     var categories: [AssetCategory] = [.all, .largeFiles, .screenshots, .similars, .duplicates]
@@ -29,11 +29,11 @@ struct HomeView: View {
                         NavigationLink {
                             AssetListView(category: category)
                                 .navigationBarHidden(true)
-                                .environmentObject(photoLoader)
+                                .environmentObject(photoManager)
                         } label: {
                             HomeSectionView(category: category)
                                 .frame(maxWidth: .infinity)
-                                .environmentObject(photoLoader)
+                                .environmentObject(photoManager)
                         }
                     }
                 }
@@ -41,31 +41,30 @@ struct HomeView: View {
         }
         .padding(.horizontal, 16)
         .background(Image("bg"))
-        .onAppear {
-            Task {
-                await photoLoader.reloadData()
-            }
+        .task {
+            photoManager.fetchAllAssets()
+            await photoManager.loadOtherCategories()
         }
     }
 }
 
 struct HomeSectionView: View {
-    @EnvironmentObject var photoLoader: PhotosLoader
-    var category: AssetCategory
+    @EnvironmentObject var photoManager: PhotoManager
     @State var showDetail: Bool = false
+    var category: AssetCategory
     
     var sections: [AssetSection] {
         switch category {
         case .all:
-            return photoLoader.allAssets
+            return photoManager.allAssets
         case .largeFiles:
-            return photoLoader.largeAssets
+            return photoManager.largeAssets
         case .screenshots:
-            return photoLoader.screenshots
+            return photoManager.screenshots
         case .duplicates:
-            return photoLoader.duplicatedPhotos
+            return photoManager.duplicatedPhotos
         case .similars:
-            return photoLoader.similarPhotos
+            return photoManager.similarPhotos
         }
     }
     
@@ -76,15 +75,15 @@ struct HomeSectionView: View {
     var totalItemSize: Float {
         switch category {
         case .all:
-            return photoLoader.allAssetsSize
+            return photoManager.allAssetsSize
         case .largeFiles:
-            return photoLoader.largeAssetsSize
+            return photoManager.largeAssetsSize
         case .similars:
-            return photoLoader.similarPhotosSize
+            return photoManager.similarPhotosSize
         case .duplicates:
-            return photoLoader.duplicatedPhotosSize
+            return photoManager.duplicatedPhotosSize
         case .screenshots:
-            return photoLoader.screenshotsSize
+            return photoManager.screenshotsSize
         }
     }
     
@@ -121,15 +120,15 @@ struct HomeSectionView: View {
         let assets: [PHAsset] = {
             switch category {
             case .all:
-                return photoLoader.allAssets.flatMap(\.assets)
+                return photoManager.allAssets.flatMap(\.assets)
             case .largeFiles:
-                return photoLoader.largeAssets.flatMap(\.assets)
+                return photoManager.largeAssets.flatMap(\.assets)
             case .screenshots:
-                return photoLoader.screenshots.flatMap(\.assets)
+                return photoManager.screenshots.flatMap(\.assets)
             case .similars:
-                return photoLoader.similarPhotos.flatMap(\.assets)
+                return photoManager.similarPhotos.flatMap(\.assets)
             case .duplicates:
-                return photoLoader.duplicatedPhotos.flatMap(\.assets)
+                return photoManager.duplicatedPhotos.flatMap(\.assets)
             }
         }()
         let itemsPerRow = category == .largeFiles ? 3 : 4

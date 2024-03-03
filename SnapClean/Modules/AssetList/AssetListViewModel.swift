@@ -14,19 +14,19 @@ class AssetListViewModel: ObservableObject {
     @Published var totalSelectedItemsSize: Float = 0
     var sections: [AssetSection] = []
     var cancellables = Set<AnyCancellable>()
-    var photoLoader: PhotosLoader?
+    var photoManager: PhotoManager?
     
     init() {
         $selectingLocalIds
             .sink { localIds in
                 self.totalSelectedItems = localIds.count
-                self.totalSelectedItemsSize = localIds.reduce(0, { $0 + (self.photoLoader?.assetMetadataCache[$1]?.sizeOnDisk ?? 0) })
+                self.totalSelectedItemsSize = localIds.reduce(0, { $0 + (self.photoManager?.sizeOnDisk(assetLocalId: $1) ?? 0) })
             }
             .store(in: &cancellables)
         
     }
     
-    func setup(photoLoader: PhotosLoader) {
-        self.photoLoader = photoLoader
+    func setup(photoManager: PhotoManager) {
+        self.photoManager = photoManager
     }
 }
