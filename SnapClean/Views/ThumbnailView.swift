@@ -38,7 +38,7 @@ struct ThumbnailView: View {
                 }
             }
             .task {
-                await loadImageAsset(targetSize: proxy.size)
+                await loadImageAsset(targetSize: CGSize(width: proxy.size.width * 3, height: proxy.size.height * 3))
             }
             .onDisappear {
                 image = nil
